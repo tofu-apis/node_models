@@ -31,7 +31,8 @@
   },
   "devDependencies": {
     "@jest/globals": "29.4.2",
-    "@tofu-apis/eslint-config-ts-base": "1.0.2",
+    "@tofu-apis/eslint-config-ts-base": "*",
+    "@tofu-apis/common-types": "*",
     "@types/jest": "29.4.0",
     "@types/lodash": "4.14.194",
     "@types/node": "18.15.11",
@@ -50,6 +51,7 @@
   },
   "dependencies": {
     "lodash": "4.17.21",
+    "mongoose": "6.9.0",
     "yup": "0.32.9"
   },
   "repository": "git@github.com:tofu-apis/node-lib_template.git",
