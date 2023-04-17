@@ -1,6 +1,6 @@
 {
-  "name": "~~__node-lib_template__~~",
-  "version": "0.0.13",
+  "name": "@tofu-apis/models",
+  "version": "0.0.0",
   "private": true,
   "main": "dist/index.js",
   "module": "src/index.ts",
