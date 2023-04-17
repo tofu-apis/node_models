@@ -1,7 +1,6 @@
 {
   "name": "@tofu-apis/models",
   "version": "0.0.2",
-  "private": true,
   "main": "dist/index.js",
   "module": "src/index.ts",
   "jsnext:main": "src/index.ts",
