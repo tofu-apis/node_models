@@ -1,6 +1,6 @@
 {
   "name": "@tofu-apis/models",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "main": "dist/index.js",
   "module": "src/index.ts",
   "jsnext:main": "src/index.ts",
