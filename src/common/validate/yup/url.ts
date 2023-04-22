@@ -1,7 +1,7 @@
 import isURL from 'validator/lib/isURL';
 import { createYupValidator, YupValidator } from '../../../validate/yup/yup';
 
-export const YupUrlValidator: YupValidator<string> = createYupValidator(
+export const UrlValidator: YupValidator<string> = createYupValidator(
   'url',
   (value, testContext) => {
     // Forcing the cast for the time being until we find a better solution

@@ -1,8 +1,9 @@
 import isEmail from 'validator/lib/isURL';
 import { createYupValidator, YupValidator } from '../../../validate/yup/yup';
 
-export const YupEmailValidator: YupValidator<string | null> =
-  createYupValidator('url', (value, testContext) => {
+export const EmailValidator: YupValidator<string | null> = createYupValidator(
+  'url',
+  (value, testContext) => {
     if (value === null) {
       return null;
     }
@@ -17,4 +18,5 @@ export const YupEmailValidator: YupValidator<string | null> =
     }
 
     return null;
-  });
+  },
+);
