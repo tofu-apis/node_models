@@ -1,6 +1,6 @@
 import { string } from 'yup';
-import { CrudOperation } from '../../types/crudOperation';
-import { NullableStringType } from '../../types/nullableType';
+import { CrudOperation } from '../../../types/crudOperation';
+import { NullableStringType } from './nullableType';
 
 export const MongoDBStorageIDString = string()
   .min(24)

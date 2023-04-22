@@ -1,4 +1,1 @@
-export * from './definition';
-export * from './object';
-export * from './schema';
-export * from './validate';
+export * as YupMongo from './yup';

@@ -1,2 +1,1 @@
-export * from './email';
-export * from './url';
+export * as YupValidators from './yup';
