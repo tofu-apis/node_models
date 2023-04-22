@@ -1,6 +1,6 @@
 import { expect, test } from '@jest/globals';
 import { Asserts, number, object } from 'yup';
-import { validate } from '../../src/mongo/yup/validate';
+import { validate } from '../../../src/mongo/yup/validate';
 
 const testSchema = object({
   integerField: number().integer(),

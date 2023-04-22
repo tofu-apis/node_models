@@ -1,1 +1,1 @@
-export * from './unixTimestamp';
+export * as YupCreate from './yup/unixTimestamp';

@@ -1,4 +1,4 @@
-import { UnixTimestamp } from '../../src/create/unixTimestamp';
+import { UnixTimestamp } from '../../../src/create/yup/unixTimestamp';
 import { describe, test, expect } from '@jest/globals';
 
 describe('UnixTimestamp', () => {
