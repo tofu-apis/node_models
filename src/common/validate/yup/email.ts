@@ -1,5 +1,5 @@
 import isEmail from 'validator/lib/isURL';
-import { createYupValidator, YupValidator } from '../../../validate/yup/yup';
+import { createYupValidator, YupValidator } from '../../../validate/yup';
 
 export const EmailValidator: YupValidator<string | null> = createYupValidator(
   'url',
