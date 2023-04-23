@@ -1,13 +1,13 @@
-# Basic workflow for Github Actions
 name: CD
 
-# Triggers the workflow on push or pull request events but only for the main branch
 on:
   push:
     branches: [main]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  tests:
+    uses: ./.github/workflows/tests.yaml
+
   # Revert commit (only should run on failure of some phase in a CI/CD pipeline)
   auto-revert-commit:
     needs: tests
