@@ -10,3 +10,4 @@ services:
       args:
         DOCKER_BUILDKIT: 1
     init: true
+
