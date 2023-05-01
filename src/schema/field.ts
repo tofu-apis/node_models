@@ -55,20 +55,22 @@ export class IntegerSchema implements BaseSchema {
 }
 
 // Optional
-export class UndefinedSchema implements BaseSchema {
+class UndefinedSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Undefined;
 }
 
 // Array
+export type ArrayValueSchema = Exclude<ValueSchema, OptionalValueSchema>;
+
 export class ArraySchema extends Documentable implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Array;
 
-  readonly value: Exclude<ValueSchema, OptionalValueSchema>;
+  readonly value: ArrayValueSchema;
   readonly restrictions: NonEmptyArray<ArrayRestriction>;
 
   constructor(
     docString: string,
-    value: Exclude<ValueSchema, OptionalValueSchema>,
+    value: ArrayValueSchema,
     restrictions: NonEmptyArray<ArrayRestriction>,
   ) {
     super(docString);
