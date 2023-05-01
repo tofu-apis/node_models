@@ -120,7 +120,7 @@ export class NamedUnionSchema implements BaseSchema {
 
 // Removing export for the time being since we don't have a valid use case for this currently
 // Generally, all unions should be optional or named union schemas.
-class UnnamedUnionSchema implements BaseSchema {
+export class UnnamedUnionSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Union;
 
   readonly members: NonEmptyArray<MemberizableUnionSchema>;
@@ -132,15 +132,19 @@ class UnnamedUnionSchema implements BaseSchema {
   }
 }
 
+export type OptionalNestableValueSchema = Exclude<
+  MemberizableUnionSchema,
+  OptionalValueSchema
+>;
+
 // Currently limiting the only unnamed union schema use case for optionality
 export class OptionalValueSchema extends UnnamedUnionSchema {
-  constructor(valueSchema: Exclude<ValueSchema, UnionSchema>) {
+  readonly value: OptionalNestableValueSchema;
+
+  constructor(valueSchema: OptionalNestableValueSchema) {
     const members = requireArrayNonEmpty([valueSchema, new UndefinedSchema()]);
     super(members);
-  }
-
-  getValue(): Exclude<ValueSchema, UnionSchema> {
-    return this.members[0] as Exclude<ValueSchema, UnionSchema>;
+    this.value = valueSchema;
   }
 }
 

@@ -20,7 +20,7 @@ function translateNestedSchemaToSchemaOptions<SchemaType extends BaseSchema>(
 ): SchemaTypeOptions<unknown> {
   if (modelSchema instanceof OptionalValueSchema) {
     return {
-      type: translateNestedSchemaToSchemaOptions(modelSchema.getValue()),
+      type: translateNestedSchemaToSchemaOptions(modelSchema.value),
       required: false,
     };
   } else if (modelSchema instanceof NamedUnionSchema) {
