@@ -7,7 +7,7 @@ import {
   FieldSetSchema,
   FloatSchema,
   IntegerSchema,
-  Schema,
+  BaseSchema,
   ValueSchema,
   Field,
   OptionalValueSchema,
@@ -15,7 +15,7 @@ import {
   MemberizableUnionSchema,
 } from '../schema/field';
 
-function translateNestedSchemaToSchemaOptions<SchemaType extends Schema>(
+function translateNestedSchemaToSchemaOptions<SchemaType extends BaseSchema>(
   modelSchema: SchemaType,
 ): SchemaTypeOptions<unknown> {
   if (modelSchema instanceof OptionalValueSchema) {

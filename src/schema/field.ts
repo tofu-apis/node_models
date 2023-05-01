@@ -18,16 +18,16 @@ export enum SchemaValueType {
   Union = 'Union',
 }
 
-export interface Schema {
+export interface BaseSchema {
   readonly schemaValueType: SchemaValueType;
 }
 
 // Primitives
-export class BooleanSchema implements Schema {
+export class BooleanSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Boolean;
 }
 
-export class StringSchema implements Schema {
+export class StringSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.String;
   readonly restrictions: NonEmptyArray<StringRestriction>;
 
@@ -36,7 +36,7 @@ export class StringSchema implements Schema {
   }
 }
 
-export class FloatSchema implements Schema {
+export class FloatSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Float;
   readonly restrictions: NonEmptyArray<FloatRestriction>;
 
@@ -45,7 +45,7 @@ export class FloatSchema implements Schema {
   }
 }
 
-export class IntegerSchema implements Schema {
+export class IntegerSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Integer;
   readonly restrictions: NonEmptyArray<IntegerRestriction>;
 
@@ -55,12 +55,12 @@ export class IntegerSchema implements Schema {
 }
 
 // Optional
-export class UndefinedSchema implements Schema {
+export class UndefinedSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Undefined;
 }
 
 // Array
-export class ArraySchema extends Documentable implements Schema {
+export class ArraySchema extends Documentable implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Array;
 
   readonly value: Exclude<ValueSchema, OptionalValueSchema>;
@@ -78,7 +78,7 @@ export class ArraySchema extends Documentable implements Schema {
 }
 
 // FieldSet
-export class FieldSetSchema extends Documentable implements Schema {
+export class FieldSetSchema extends Documentable implements BaseSchema {
   readonly schemaValueType = SchemaValueType.FieldSet;
   readonly fields: Record<string, Field>;
 
@@ -104,7 +104,7 @@ export type MemberizableUnionSchema =
 
 type UnionSchema = NamedUnionSchema | UnnamedUnionSchema;
 
-export class NamedUnionSchema implements Schema {
+export class NamedUnionSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Union;
 
   readonly members: Record<string, MemberizableUnionSchema>;
@@ -118,7 +118,7 @@ export class NamedUnionSchema implements Schema {
 
 // Removing export for the time being since we don't have a valid use case for this currently
 // Generally, all unions should be optional or named union schemas.
-class UnnamedUnionSchema implements Schema {
+class UnnamedUnionSchema implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Union;
 
   readonly members: NonEmptyArray<MemberizableUnionSchema>;
