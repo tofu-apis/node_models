@@ -63,12 +63,12 @@ export class UndefinedSchema implements Schema {
 export class ArraySchema extends Documentable implements Schema {
   readonly schemaValueType = SchemaValueType.Array;
 
-  readonly value: ValueSchema;
+  readonly value: Exclude<ValueSchema, OptionalValueSchema>;
   readonly restrictions: NonEmptyArray<ArrayRestriction>;
 
   constructor(
     docString: string,
-    value: ValueSchema,
+    value: Exclude<ValueSchema, OptionalValueSchema>,
     restrictions: NonEmptyArray<ArrayRestriction>,
   ) {
     super(docString);
@@ -98,7 +98,7 @@ export class Field extends Documentable {
 }
 
 // Union
-type MemberizableUnionSchema =
+export type MemberizableUnionSchema =
   | Exclude<ValueSchema, UnionSchema>
   | UndefinedSchema;
 
@@ -116,7 +116,9 @@ export class NamedUnionSchema implements Schema {
   }
 }
 
-export class UnnamedUnionSchema implements Schema {
+// Removing export for the time being since we don't have a valid use case for this currently
+// Generally, all unions should be optional or named union schemas.
+class UnnamedUnionSchema implements Schema {
   readonly schemaValueType = SchemaValueType.Union;
 
   readonly members: NonEmptyArray<MemberizableUnionSchema>;
@@ -133,6 +135,10 @@ export class OptionalValueSchema extends UnnamedUnionSchema {
   constructor(valueSchema: Exclude<ValueSchema, UnionSchema>) {
     const members = requireArrayNonEmpty([valueSchema, new UndefinedSchema()]);
     super(members);
+  }
+
+  getValue(): Exclude<ValueSchema, UnionSchema> {
+    return this.members[0] as Exclude<ValueSchema, UnionSchema>;
   }
 }
 
