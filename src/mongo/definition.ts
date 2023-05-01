@@ -10,23 +10,18 @@ import {
   BaseSchema,
   ValueSchema,
   Field,
-  OptionalValueSchema,
-  NamedUnionSchema,
-  MemberizableUnionSchema,
+  OptionalSchema,
+  FieldSetFields,
+  ArrayValueSchema,
 } from '../schema/field';
 
 function translateNestedSchemaToSchemaOptions<SchemaType extends BaseSchema>(
   modelSchema: SchemaType,
 ): SchemaTypeOptions<unknown> {
-  if (modelSchema instanceof OptionalValueSchema) {
+  if (modelSchema instanceof OptionalSchema) {
     return {
-      type: translateNestedSchemaToSchemaOptions(modelSchema.getValue()),
+      type: translateNestedSchemaToSchemaOptions(modelSchema.value),
       required: false,
-    };
-  } else if (modelSchema instanceof NamedUnionSchema) {
-    return {
-      type: translateNamedUnionSchemaToSchemaDefinition(modelSchema),
-      required: true,
     };
   } else if (modelSchema instanceof BooleanSchema) {
     return {
@@ -54,7 +49,7 @@ function translateNestedSchemaToSchemaOptions<SchemaType extends BaseSchema>(
       required: true,
     };
   } else if (modelSchema instanceof ArraySchema) {
-    const arraySchema = modelSchema as ArraySchema;
+    const arraySchema = modelSchema as ArraySchema<ArrayValueSchema>;
 
     const innerSchemaType = arraySchema.value;
 
@@ -70,35 +65,16 @@ function translateNestedSchemaToSchemaOptions<SchemaType extends BaseSchema>(
 }
 
 export function translateFieldSetSchemaToSchemaDefinition(
-  modelSchema: FieldSetSchema,
+  modelSchema: FieldSetSchema<FieldSetFields>,
 ): SchemaDefinition {
   const schemaJson: SchemaDefinition = {};
 
-  _.toPairs(modelSchema.fields).forEach((fieldSchemaPair) => {
-    const [fieldName, fieldSchema]: [string, Field] = fieldSchemaPair;
-
-    const valueSchema: ValueSchema = fieldSchema.value;
-
+  for (const [fieldName, fieldSchema] of Object.entries(modelSchema.fields)) {
+    const currentFieldSchema: Field<ValueSchema> =
+      fieldSchema as Field<ValueSchema>;
+    const valueSchema: ValueSchema = currentFieldSchema.value;
     schemaJson[fieldName] = translateNestedSchemaToSchemaOptions(valueSchema);
-  });
-
-  return schemaJson;
-}
-
-export function translateNamedUnionSchemaToSchemaDefinition(
-  modelSchema: NamedUnionSchema,
-): SchemaDefinition {
-  const schemaJson: SchemaDefinition = {};
-
-  _.toPairs(modelSchema.members).forEach((memberSchemaPair) => {
-    const [memberName, memberUnionSchema]: [string, MemberizableUnionSchema] =
-      memberSchemaPair;
-
-    schemaJson[memberName] = {
-      type: translateNestedSchemaToSchemaOptions(memberUnionSchema),
-      required: false,
-    };
-  });
+  }
 
   return schemaJson;
 }

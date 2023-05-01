@@ -1,12 +1,17 @@
 import { Schema as MongooseSchema } from 'mongoose';
 import { checkArgument } from '@tofu-apis/common-types';
 import { translateFieldSetSchemaToSchemaDefinition } from './definition';
-import { FieldSetSchema, StringSchema, ValueSchema } from '../schema';
+import {
+  FieldSetFields,
+  FieldSetSchema,
+  StringSchema,
+  ValueSchema,
+} from '../schema';
 
 const INTERNAL_ID_FIELD_NAME = 'internalId';
 
 export function createMongooseSchema(
-  modelSchema: FieldSetSchema,
+  modelSchema: FieldSetSchema<FieldSetFields>,
 ): MongooseSchema {
   validateStorageSchema(modelSchema);
 
@@ -15,7 +20,9 @@ export function createMongooseSchema(
   );
 }
 
-function validateStorageSchema(modelSchema: FieldSetSchema): void {
+function validateStorageSchema(
+  modelSchema: FieldSetSchema<FieldSetFields>,
+): void {
   const fieldSchemas = modelSchema.fields;
 
   checkArgument(

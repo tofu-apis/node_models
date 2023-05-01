@@ -5,6 +5,7 @@ import {
   IntegerSchema,
   SchemaValueType,
   ArraySchema,
+  ArrayValueSchema,
 } from '../schema/field'; // Import from your existing code
 import {
   ArraySizeRestriction,
@@ -162,7 +163,7 @@ export const IntegerValidator = (
 
 export const ArrayValidator = (
   input: unknown[],
-  schema: ArraySchema,
+  schema: ArraySchema<ArrayValueSchema>,
 ): ValidationOutcome<ValidationErrorType> => {
   const restrictions = schema.restrictions;
 

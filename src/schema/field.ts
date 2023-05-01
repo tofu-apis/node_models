@@ -1,4 +1,4 @@
-import { NonEmptyArray, requireArrayNonEmpty } from '@tofu-apis/common-types';
+import { NonEmptyArray } from '@tofu-apis/common-types';
 import { Documentable } from './documentable';
 import {
   ArrayRestriction,
@@ -12,10 +12,9 @@ export enum SchemaValueType {
   String = 'String',
   Float = 'Float',
   Integer = 'Integer',
-  Undefined = 'Undefined',
   Array = 'Array',
   FieldSet = 'FieldSet',
-  Union = 'Union',
+  Optional = 'Optional',
 }
 
 export interface BaseSchema {
@@ -54,23 +53,21 @@ export class IntegerSchema implements BaseSchema {
   }
 }
 
-// Optional
-class UndefinedSchema implements BaseSchema {
-  readonly schemaValueType = SchemaValueType.Undefined;
-}
-
 // Array
-export type ArrayValueSchema = Exclude<ValueSchema, OptionalValueSchema>;
+export type ArrayValueSchema = Exclude<ValueSchema, OptionalSchema>;
 
-export class ArraySchema extends Documentable implements BaseSchema {
+export class ArraySchema<T extends ArrayValueSchema>
+  extends Documentable
+  implements BaseSchema
+{
   readonly schemaValueType = SchemaValueType.Array;
 
-  readonly value: ArrayValueSchema;
+  readonly value: T;
   readonly restrictions: NonEmptyArray<ArrayRestriction>;
 
   constructor(
     docString: string,
-    value: ArrayValueSchema,
+    value: T,
     restrictions: NonEmptyArray<ArrayRestriction>,
   ) {
     super(docString);
@@ -80,77 +77,54 @@ export class ArraySchema extends Documentable implements BaseSchema {
 }
 
 // FieldSet
-export class FieldSetSchema extends Documentable implements BaseSchema {
-  readonly schemaValueType = SchemaValueType.FieldSet;
-  readonly fields: Record<string, Field>;
+export type FieldSetFields = {
+  [key: string]: Field<ValueSchema>;
+};
 
-  constructor(docString: string, fields: Record<string, Field>) {
+export class FieldSetSchema<F extends FieldSetFields>
+  extends Documentable
+  implements BaseSchema
+{
+  readonly schemaValueType = SchemaValueType.FieldSet;
+  readonly fields: F;
+
+  constructor(docString: string, fields: F) {
     super(docString);
     this.fields = fields;
   }
 }
 
-export class Field extends Documentable {
-  readonly value: ValueSchema;
+export class Field<T extends ValueSchema> extends Documentable {
+  readonly value: T;
 
-  constructor(docString: string, value: ValueSchema) {
+  constructor(docString: string, value: T) {
     super(docString);
     this.value = value;
   }
 }
 
-// Union
-export type MemberizableUnionSchema =
-  | Exclude<ValueSchema, UnionSchema>
-  | UndefinedSchema;
+// Optional
+export type RequiredSchema = Exclude<ValueSchema, OptionalSchema>;
 
-type UnionSchema = NamedUnionSchema | UnnamedUnionSchema;
+export class OptionalSchema extends Documentable implements BaseSchema {
+  readonly schemaValueType = SchemaValueType.Optional;
+  readonly value: RequiredSchema;
 
-export class NamedUnionSchema implements BaseSchema {
-  readonly schemaValueType = SchemaValueType.Union;
-
-  readonly members: Record<string, MemberizableUnionSchema>;
-  readonly isNamed: boolean;
-
-  constructor(members: Record<string, MemberizableUnionSchema>) {
-    this.members = members;
-    this.isNamed = true;
+  constructor(docString: string, value: RequiredSchema) {
+    super(docString);
+    this.value = value;
   }
 }
 
-// Removing export for the time being since we don't have a valid use case for this currently
-// Generally, all unions should be optional or named union schemas.
-class UnnamedUnionSchema implements BaseSchema {
-  readonly schemaValueType = SchemaValueType.Union;
-
-  readonly members: NonEmptyArray<MemberizableUnionSchema>;
-  readonly isNamed: false;
-
-  constructor(members: NonEmptyArray<MemberizableUnionSchema>) {
-    this.members = members;
-    this.isNamed = false;
-  }
-}
-
-// Currently limiting the only unnamed union schema use case for optionality
-export class OptionalValueSchema extends UnnamedUnionSchema {
-  constructor(valueSchema: Exclude<ValueSchema, UnionSchema>) {
-    const members = requireArrayNonEmpty([valueSchema, new UndefinedSchema()]);
-    super(members);
-  }
-
-  getValue(): Exclude<ValueSchema, UnionSchema> {
-    return this.members[0] as Exclude<ValueSchema, UnionSchema>;
-  }
-}
-
-// Value: can be representative of a value in an array, union, or
+// Value: can be representative of a value in an array, or
 // a value for a field in a FieldSet.
 export type ValueSchema =
-  | ArraySchema
+  // Disabling eslint rule because we need to use `any` here as using
+  // ArrayValueSchema or RequiredSchema will cause a circular reference.
+  | ArraySchema<any> // eslint-disable-line @typescript-eslint/no-explicit-any
   | BooleanSchema
-  | FieldSetSchema
+  | FieldSetSchema<FieldSetFields>
   | FloatSchema
   | IntegerSchema
-  | StringSchema
-  | UnionSchema;
+  | OptionalSchema
+  | StringSchema;
