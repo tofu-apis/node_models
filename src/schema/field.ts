@@ -54,7 +54,7 @@ export class IntegerSchema implements BaseSchema {
 }
 
 // Array
-export type ArrayValueSchema = Exclude<ValueSchema, OptionalSchema>;
+export type ArrayValueSchema = Exclude<BaseSchema, OptionalSchema>;
 
 export class ArraySchema<T extends ArrayValueSchema>
   extends Documentable
@@ -78,7 +78,7 @@ export class ArraySchema<T extends ArrayValueSchema>
 
 // FieldSet
 export type FieldSetFields = {
-  [key: string]: Field<ValueSchema>;
+  [key: string]: Field<BaseSchema>;
 };
 
 export class FieldSetSchema<F extends FieldSetFields>
@@ -94,7 +94,7 @@ export class FieldSetSchema<F extends FieldSetFields>
   }
 }
 
-export class Field<T extends ValueSchema> extends Documentable {
+export class Field<T extends BaseSchema> extends Documentable {
   readonly value: T;
 
   constructor(docString: string, value: T) {
@@ -104,7 +104,7 @@ export class Field<T extends ValueSchema> extends Documentable {
 }
 
 // Optional
-export type RequiredSchema = Exclude<ValueSchema, OptionalSchema>;
+export type RequiredSchema = Exclude<BaseSchema, OptionalSchema>;
 
 export class OptionalSchema extends Documentable implements BaseSchema {
   readonly schemaValueType = SchemaValueType.Optional;
@@ -115,16 +115,3 @@ export class OptionalSchema extends Documentable implements BaseSchema {
     this.value = value;
   }
 }
-
-// Value: can be representative of a value in an array, or
-// a value for a field in a FieldSet.
-export type ValueSchema =
-  // Disabling eslint rule because we need to use `any` here as using
-  // ArrayValueSchema or RequiredSchema will cause a circular reference.
-  | ArraySchema<any> // eslint-disable-line @typescript-eslint/no-explicit-any
-  | BooleanSchema
-  | FieldSetSchema<FieldSetFields>
-  | FloatSchema
-  | IntegerSchema
-  | OptionalSchema
-  | StringSchema;

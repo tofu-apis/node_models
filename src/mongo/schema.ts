@@ -5,7 +5,7 @@ import {
   FieldSetFields,
   FieldSetSchema,
   StringSchema,
-  ValueSchema,
+  BaseSchema,
 } from '../schema';
 
 const INTERNAL_ID_FIELD_NAME = 'internalId';
@@ -30,7 +30,7 @@ function validateStorageSchema(
     `${INTERNAL_ID_FIELD_NAME} field must exist in storage schema to translate to MongoDB schema.`,
   );
 
-  const internalIdSchema: ValueSchema =
+  const internalIdSchema: BaseSchema =
     fieldSchemas[INTERNAL_ID_FIELD_NAME].value;
 
   checkArgument(

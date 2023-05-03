@@ -8,7 +8,6 @@ import {
   FloatSchema,
   IntegerSchema,
   BaseSchema,
-  ValueSchema,
   Field,
   OptionalSchema,
   FieldSetFields,
@@ -70,10 +69,10 @@ export function translateFieldSetSchemaToSchemaDefinition(
   const schemaJson: SchemaDefinition = {};
 
   for (const [fieldName, fieldSchema] of Object.entries(modelSchema.fields)) {
-    const currentFieldSchema: Field<ValueSchema> =
-      fieldSchema as Field<ValueSchema>;
-    const valueSchema: ValueSchema = currentFieldSchema.value;
-    schemaJson[fieldName] = translateNestedSchemaToSchemaOptions(valueSchema);
+    const currentFieldSchema: Field<BaseSchema> =
+      fieldSchema as Field<BaseSchema>;
+    const schema: BaseSchema = currentFieldSchema.value;
+    schemaJson[fieldName] = translateNestedSchemaToSchemaOptions(schema);
   }
 
   return schemaJson;
