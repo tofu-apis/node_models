@@ -1,5 +1,3 @@
-import { NonEmptyArray } from '@tofu-apis/common-types';
-
 // Currently, there isn't a clear way to enforce an type to be an enum string type so using extension of a string instead.
 export interface InvalidResult<INVALID_TYPE extends string> {
   type: INVALID_TYPE;
@@ -24,12 +22,6 @@ export class ValidationOutcome<INVALID_TYPE extends string> {
   }
 
   public getInvalidResults(): InvalidResult<INVALID_TYPE>[] {
-    if (this.isValid()) {
-      throw new Error(
-        `Cannot get InvalidResults for a valid ${this.constructor.name}`,
-      );
-    }
-
     return this.invalidResults;
   }
 }
@@ -49,7 +41,7 @@ export class InvalidOutcomeBuilder<INVALID_TYPE extends string> {
   }
 
   public addInvalidResults(
-    invalidResults: NonEmptyArray<InvalidResult<INVALID_TYPE>>,
+    invalidResults: InvalidResult<INVALID_TYPE>[],
   ): InvalidOutcomeBuilder<INVALID_TYPE> {
     this.invalidResults.push(...invalidResults);
     return this;

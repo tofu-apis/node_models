@@ -1,22 +1,21 @@
-import {
-  ArraySchema,
-  FloatSchema,
-  IntegerSchema,
-  StringSchema,
-  SchemaValueType,
-  BooleanSchema,
-} from '../../src/schema/field';
-import {
-  ArrayValidator,
-  FloatValidator,
-  IntegerValidator,
-  StringValidator,
-} from '../../src/validate/field';
+import { Int, requireArrayNonEmpty } from '@tofu-apis/common-types';
 import {
   RestrictionType,
   ValidationErrorType,
 } from '../../src/types/validation';
-import { Int, requireArrayNonEmpty } from '@tofu-apis/common-types';
+import {
+  BooleanValidator,
+  FloatValidator,
+  IntegerValidator,
+  StringValidator,
+} from '../../src/validate/primitive';
+import {
+  FloatSchema,
+  IntegerSchema,
+  SchemaValueType,
+  StringSchema,
+  BooleanSchema,
+} from '../../src/schema';
 import { Documentable } from '../../src/schema/documentable';
 
 function createDocumentable<T>(value: T): T & Documentable {
@@ -25,6 +24,31 @@ function createDocumentable<T>(value: T): T & Documentable {
     docString: 'dummy doc string',
   };
 }
+
+describe('BooleanValidator', () => {
+  const schema: BooleanSchema = new BooleanSchema();
+
+  it('should return a valid outcome if true', () => {
+    const outcome = BooleanValidator(true, schema);
+    expect(outcome.isValid()).toBe(true);
+  });
+
+  it('should return a valid outcome if false', () => {
+    const outcome = BooleanValidator(false, schema);
+    expect(outcome.isValid()).toBe(true);
+  });
+
+  it('should return invalid outcome for non-boolean', () => {
+    const outcome = BooleanValidator(3, schema);
+
+    expect(outcome.isValid()).toBe(false);
+    expect(outcome.getInvalidResults()).toHaveLength(1);
+    const invalidResult = outcome.getInvalidResults()[0];
+    expect(invalidResult.type).toBe(
+      ValidationErrorType.UnexpectedTypeRestriction,
+    );
+  });
+});
 
 describe('StringValidator', () => {
   const schema: StringSchema = {
@@ -47,6 +71,17 @@ describe('StringValidator', () => {
   it('should return a valid outcome if input satisfies all restrictions', () => {
     const outcome = StringValidator('foo', schema);
     expect(outcome.isValid()).toBe(true);
+  });
+
+  it('should return invalid outcome for non-string', () => {
+    const outcome = StringValidator(true, schema);
+
+    expect(outcome.isValid()).toBe(false);
+    expect(outcome.getInvalidResults()).toHaveLength(1);
+    const invalidResult = outcome.getInvalidResults()[0];
+    expect(invalidResult.type).toBe(
+      ValidationErrorType.UnexpectedTypeRestriction,
+    );
   });
 
   it('should return an invalid outcome if input violates size restriction', () => {
@@ -89,6 +124,17 @@ describe('FloatValidator', () => {
     expect(outcome.isValid()).toBe(true);
   });
 
+  it('should return invalid outcome for non-number', () => {
+    const outcome = FloatValidator(true, schema);
+
+    expect(outcome.isValid()).toBe(false);
+    expect(outcome.getInvalidResults()).toHaveLength(1);
+    const invalidResult = outcome.getInvalidResults()[0];
+    expect(invalidResult.type).toBe(
+      ValidationErrorType.UnexpectedTypeRestriction,
+    );
+  });
+
   it('returns an invalid outcome for invalid input', () => {
     const outcome = FloatValidator(2.0, schema);
     expect(outcome.isValid()).toBe(false);
@@ -118,6 +164,28 @@ describe('IntegerValidator', () => {
       }),
     ]),
   );
+
+  it('should return invalid outcome for non-number', () => {
+    const outcome = IntegerValidator(true, schema);
+
+    expect(outcome.isValid()).toBe(false);
+    expect(outcome.getInvalidResults()).toHaveLength(1);
+    const invalidResult = outcome.getInvalidResults()[0];
+    expect(invalidResult.type).toBe(
+      ValidationErrorType.UnexpectedTypeRestriction,
+    );
+  });
+
+  it('should return invalid outcome for non-integer number', () => {
+    const outcome = IntegerValidator(3.1, schema);
+
+    expect(outcome.isValid()).toBe(false);
+    expect(outcome.getInvalidResults()).toHaveLength(1);
+    const invalidResult = outcome.getInvalidResults()[0];
+    expect(invalidResult.type).toBe(
+      ValidationErrorType.UnexpectedTypeRestriction,
+    );
+  });
 
   it('should return valid outcome for valid input', () => {
     const outcome = IntegerValidator(3 as Int, schema);
@@ -150,38 +218,5 @@ describe('IntegerValidator', () => {
     expect(outcome.getInvalidResults()[0].type).toBe(
       ValidationErrorType.SetRestriction,
     );
-  });
-});
-
-describe('ArrayValidator', () => {
-  const schema = new ArraySchema(
-    'dummy doc string',
-    new BooleanSchema(),
-    requireArrayNonEmpty([
-      createDocumentable({
-        type: RestrictionType.Size,
-        bounds: [1, 5] as [Int, Int],
-      }),
-    ]),
-  );
-
-  it('should return true when the size of the array is within the min and max', () => {
-    expect(ArrayValidator([1, 2, 3], schema).isValid()).toEqual(true);
-  });
-
-  it('should return false when the size of the array is below the min', () => {
-    const outcome = ArrayValidator([], schema);
-    expect(outcome.isValid()).toEqual(false);
-    expect(outcome.getInvalidResults()).toHaveLength(1);
-    const invalidResult = outcome.getInvalidResults()[0];
-    expect(invalidResult.type).toEqual(ValidationErrorType.SizeRestriction);
-  });
-
-  it('should return false when the size of the array is above the max', () => {
-    const outcome = ArrayValidator([1, 2, 3, 4, 5, 6, 7], schema);
-    expect(outcome.isValid()).toEqual(false);
-    expect(outcome.getInvalidResults()).toHaveLength(1);
-    const invalidResult = outcome.getInvalidResults()[0];
-    expect(invalidResult.type).toEqual(ValidationErrorType.SizeRestriction);
   });
 });

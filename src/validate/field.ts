@@ -1,197 +1,72 @@
-import { Int, requireArrayNonEmpty } from '@tofu-apis/common-types';
 import {
-  StringSchema,
+  ArraySchema,
+  BaseSchema,
+  BooleanSchema,
+  FieldSetSchema,
   FloatSchema,
   IntegerSchema,
-  SchemaValueType,
-  ArraySchema,
-  ArrayValueSchema,
-} from '../schema/field'; // Import from your existing code
+  OptionalSchema,
+  StringSchema,
+} from '../schema';
+import { ValidationErrorType } from '../types';
 import {
-  ArraySizeRestriction,
-  FloatRangeRestriction,
-  IntegerRangeRestriction,
-  IntegerSetRestriction,
-  StringSetRestriction,
-  StringSizeRestriction,
-} from '../schema/restriction';
-import { ValidationOutcome, InvalidOutcomeBuilder } from './outcome';
-import { RestrictionType, ValidationErrorType } from '../types/validation';
+  ArrayValidator,
+  FieldSetValidator,
+  OptionalValidator,
+  RequiredValidator,
+} from './complex';
+import { InvalidOutcomeBuilder, ValidationOutcome } from './outcome';
 import {
-  ArraySizeRestrictionValidator,
-  FloatRangeRestrictionValidator,
-  IntegerRangeRestrictionValidator,
-  IntegerSetRestrictionValidator,
-  StringSetRestrictionValidator,
-  StringSizeRestrictionValidator,
-} from './restriction';
+  BooleanValidator,
+  FloatValidator,
+  IntegerValidator,
+  StringValidator,
+} from './primitive';
 
-export const StringValidator = (
-  input: string,
-  schema: StringSchema,
+export const GenericValueValidator = (
+  input: unknown,
+  schema: BaseSchema,
 ): ValidationOutcome<ValidationErrorType> => {
-  const restrictions = schema.restrictions;
-
   const builder = new InvalidOutcomeBuilder<ValidationErrorType>();
 
-  for (const restriction of restrictions) {
-    const restrictionType = restriction.type;
-    switch (restrictionType) {
-      case RestrictionType.Size:
-        const sizeRestriction = restriction as StringSizeRestriction;
-        const sizeOutcome = StringSizeRestrictionValidator(
-          input,
-          sizeRestriction,
-        );
-        if (!sizeOutcome.isValid()) {
-          builder.addInvalidResults(
-            requireArrayNonEmpty(
-              sizeOutcome.getInvalidResults(),
-              `Invalid size validation outcome should have non-zero invalid result count for input: "${input}"`,
-            ),
-          );
-        }
-        break;
-      case RestrictionType.Set:
-        const setRestriction = restriction as StringSetRestriction;
-        const setOutcome = StringSetRestrictionValidator(input, setRestriction);
-        if (!setOutcome.isValid()) {
-          builder.addInvalidResults(
-            requireArrayNonEmpty(
-              setOutcome.getInvalidResults(),
-              `Invalid set validation outcome should have non-zero invalid result count for input: "${input}"`,
-            ),
-          );
-        }
-        break;
-      default:
-        throw new Error(
-          `Unsupported ${SchemaValueType.String} restriction type: ${restrictionType}`,
-        );
-    }
+  if (schema instanceof OptionalSchema) {
+    builder.addInvalidResults(
+      OptionalValidator(input, schema).getInvalidResults(),
+    );
+    return builder.build();
   }
 
-  return builder.build();
-};
+  // If not optional, we default to required.
+  builder.addInvalidResults(
+    RequiredValidator(input, schema).getInvalidResults(),
+  );
 
-export const FloatValidator = (
-  input: number,
-  schema: FloatSchema,
-): ValidationOutcome<ValidationErrorType> => {
-  const restrictions = schema.restrictions;
-
-  const builder = new InvalidOutcomeBuilder<ValidationErrorType>();
-
-  for (const restriction of restrictions) {
-    const restrictionType = restriction.type;
-    switch (restrictionType) {
-      case RestrictionType.Range:
-        const rangeRestriction = restriction as FloatRangeRestriction;
-        const rangeOutcome = FloatRangeRestrictionValidator(
-          input,
-          rangeRestriction,
-        );
-        if (!rangeOutcome.isValid()) {
-          builder.addInvalidResults(
-            requireArrayNonEmpty(
-              rangeOutcome.getInvalidResults(),
-              `Invalid range validation outcome should have non-zero invalid result count for input: "${input}"`,
-            ),
-          );
-        }
-        break;
-      default:
-        throw new Error(
-          `Unsupported ${SchemaValueType.Float} restriction type: ${restrictionType}`,
-        );
-    }
-  }
-
-  return builder.build();
-};
-
-export const IntegerValidator = (
-  input: Int,
-  schema: IntegerSchema,
-): ValidationOutcome<ValidationErrorType> => {
-  const restrictions = schema.restrictions;
-
-  const builder = new InvalidOutcomeBuilder<ValidationErrorType>();
-
-  for (const restriction of restrictions) {
-    const restrictionType = restriction.type;
-    switch (restrictionType) {
-      case RestrictionType.Range:
-        const rangeRestriction = restriction as IntegerRangeRestriction;
-        const rangeOutcome = IntegerRangeRestrictionValidator(
-          input,
-          rangeRestriction,
-        );
-        if (!rangeOutcome.isValid()) {
-          builder.addInvalidResults(
-            requireArrayNonEmpty(
-              rangeOutcome.getInvalidResults(),
-              `Invalid range validation outcome should have non-zero invalid result count for input: "${input}"`,
-            ),
-          );
-        }
-        break;
-      case RestrictionType.Set:
-        const setRestriction = restriction as IntegerSetRestriction;
-        const setOutcome = IntegerSetRestrictionValidator(
-          input,
-          setRestriction,
-        );
-        if (!setOutcome.isValid()) {
-          builder.addInvalidResults(
-            requireArrayNonEmpty(
-              setOutcome.getInvalidResults(),
-              `Invalid set validation outcome should have non-zero invalid result count for input: "${input}"`,
-            ),
-          );
-        }
-        break;
-      default:
-        throw new Error(
-          `Unsupported ${SchemaValueType.Integer} restriction type: ${restrictionType}`,
-        );
-    }
-  }
-
-  return builder.build();
-};
-
-export const ArrayValidator = (
-  input: unknown[],
-  schema: ArraySchema<ArrayValueSchema>,
-): ValidationOutcome<ValidationErrorType> => {
-  const restrictions = schema.restrictions;
-
-  const builder = new InvalidOutcomeBuilder<ValidationErrorType>();
-
-  for (const restriction of restrictions) {
-    const restrictionType = restriction.type;
-    switch (restrictionType) {
-      case RestrictionType.Size:
-        const sizeRestriction = restriction as ArraySizeRestriction;
-        const sizeOutcome = ArraySizeRestrictionValidator(
-          input,
-          sizeRestriction,
-        );
-        if (!sizeOutcome.isValid()) {
-          builder.addInvalidResults(
-            requireArrayNonEmpty(
-              sizeOutcome.getInvalidResults(),
-              `Invalid size validation outcome should have non-zero invalid result count for input: "${input}"`,
-            ),
-          );
-        }
-        break;
-      default:
-        throw new Error(
-          `Unsupported ${SchemaValueType.Array} restriction type: ${restrictionType}`,
-        );
-    }
+  if (schema instanceof BooleanSchema) {
+    builder.addInvalidResults(
+      BooleanValidator(input, schema).getInvalidResults(),
+    );
+  } else if (schema instanceof StringSchema) {
+    builder.addInvalidResults(
+      StringValidator(input, schema).getInvalidResults(),
+    );
+  } else if (schema instanceof FloatSchema) {
+    builder.addInvalidResults(
+      FloatValidator(input, schema).getInvalidResults(),
+    );
+  } else if (schema instanceof IntegerSchema) {
+    builder.addInvalidResults(
+      IntegerValidator(input, schema).getInvalidResults(),
+    );
+  } else if (schema instanceof ArraySchema) {
+    builder.addInvalidResults(
+      ArrayValidator(input, schema).getInvalidResults(),
+    );
+  } else if (schema instanceof FieldSetSchema) {
+    builder.addInvalidResults(
+      FieldSetValidator(input, schema).getInvalidResults(),
+    );
+  } else {
+    throw new Error(`Unsupported schema type: ${schema.schemaValueType}`);
   }
 
   return builder.build();

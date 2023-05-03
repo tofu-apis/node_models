@@ -6,6 +6,10 @@ export enum RestrictionType {
 }
 
 export enum ValidationErrorType {
+  UnexpectedTypeRestriction = 'UnexpectedTypeRestriction',
+  UnexpectedFieldRestriction = 'UnexpectedFieldRestriction',
+  NonNullRestriction = 'NonNullRestriction',
+  RequiredRestriction = 'RequiredRestriction',
   RangeRestriction = 'RangeRestriction',
   SizeRestriction = 'SizeRestriction',
   SetRestriction = 'SetRestriction',
